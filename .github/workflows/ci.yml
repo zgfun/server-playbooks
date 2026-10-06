@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ansible-core ansible-lint
+      - run: ansible-galaxy collection install -r requirements.yml
+      - run: ansible-lint
+      - run: ansible-playbook --syntax-check site.yml bootstrap.yml
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ansible-core
+      - run: ansible-galaxy collection install -r requirements.yml
+      - run: ./tests/smoke.sh

@@ -1,0 +1,11 @@
+# Smoke-test inventory: a throwaway Ubuntu container driven over the Docker API.
+all:
+  hosts:
+    ansible-test:
+      ansible_connection: community.docker.docker
+      ansible_user: root
+      ansible_become: false
+  children:
+    web:
+      hosts:
+        ansible-test:

@@ -1,0 +1,31 @@
+---
+- name: Create the stack directory
+  ansible.builtin.file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+
+- name: Render docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ app_dir }}/docker-compose.yml"
+    owner: "{{ deploy_user }}"
+    mode: "0644"
+  notify: Restart stack
+
+- name: Render Caddyfile
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: "{{ app_dir }}/Caddyfile"
+    owner: "{{ deploy_user }}"
+    mode: "0644"
+  notify: Restart stack
+
+- name: Start the stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_dir }}"
+    state: present
+    pull: missing
+  tags: [service]

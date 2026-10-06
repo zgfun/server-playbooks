@@ -1,0 +1,19 @@
+---
+- name: Create the backup directory
+  ansible.builtin.file:
+    path: "{{ backup_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: Install the backup script
+  ansible.builtin.template:
+    src: backup.sh.j2
+    dest: /usr/local/bin/stack-backup
+    mode: "0755"
+
+- name: Run the backup nightly at 03:30
+  ansible.builtin.cron:
+    name: stack backup
+    minute: "30"
+    hour: "3"
+    job: /usr/local/bin/stack-backup >> /var/log/stack-backup.log 2>&1

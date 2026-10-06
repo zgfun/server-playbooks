@@ -1,0 +1,55 @@
+---
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ timezone }}"
+
+- name: Update apt cache and upgrade packages
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+    upgrade: safe
+
+- name: Install baseline packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - git
+      - htop
+      - sudo
+      - cron
+      - openssh-server
+      - unattended-upgrades
+      - apt-listchanges
+      - ca-certificates
+      - gnupg
+      - python3-debian   # needed by deb822_repository
+    state: present
+
+- name: Enable unattended security upgrades
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    mode: "0644"
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      APT::Periodic::AutocleanInterval "7";
+
+- name: Ensure the deploy user exists with sudo
+  ansible.builtin.user:
+    name: "{{ deploy_user }}"
+    groups: sudo
+    append: true
+    shell: /bin/bash
+
+- name: Allow passwordless sudo for the deploy user
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ deploy_user }}"
+    mode: "0440"
+    content: "{{ deploy_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Install SSH keys for the deploy user
+  ansible.posix.authorized_key:
+    user: "{{ deploy_user }}"
+    key: "{{ item }}"
+  loop: "{{ ssh_public_keys }}"

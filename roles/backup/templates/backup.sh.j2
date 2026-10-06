@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Managed by Ansible (roles/backup). Tars every Docker volume of the stack and
+# prunes archives older than {{ backup_keep_days }} days.
+set -euo pipefail
+stamp=$(date +%Y-%m-%d_%H%M)
+dest="{{ backup_dir }}/stack-${stamp}.tar.gz"
+docker run --rm \
+  -v /var/lib/docker/volumes:/volumes:ro \
+  -v "{{ backup_dir }}":/out \
+  alpine:3 sh -c "tar czf /out/stack-${stamp}.tar.gz -C /volumes ."
+find "{{ backup_dir }}" -name 'stack-*.tar.gz' -mtime +{{ backup_keep_days }} -delete
+echo "$(date -Is) wrote ${dest}"

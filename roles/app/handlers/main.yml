@@ -1,0 +1,6 @@
+---
+- name: Restart stack
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_dir }}"
+    state: restarted
+  when: ansible_service_mgr == "systemd"

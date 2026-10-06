@@ -1,0 +1,20 @@
+# Shared settings. Secrets do not belong here; use ansible-vault or env vars.
+timezone: Europe/Budapest
+deploy_user: deploy
+
+# SSH key that may log in as the deploy user. Same key Terraform put on the box.
+ssh_public_keys:
+  - "ssh-ed25519 AAAA... you@laptop"
+
+# Ports ufw leaves open besides SSH.
+open_tcp_ports: [80, 443]
+
+# What runs on the box. Caddy terminates TLS and proxies to the other containers.
+app_dir: /opt/stack
+app_domain: lab.peterpancza.com
+app_email: pancza.peter@gmail.com     # for Let's Encrypt notices
+uptime_kuma_version: "1"
+
+# Backups: a nightly tar of the Docker volumes, kept for 14 days.
+backup_dir: /var/backups/stack
+backup_keep_days: 14

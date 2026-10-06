@@ -1,0 +1,28 @@
+# Managed by Ansible (roles/app). Caddy gets the certificates, everything else
+# stays on the internal network and is only reachable through it.
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:{{ uptime_kuma_version }}
+    restart: unless-stopped
+    volumes:
+      - kuma_data:/app/data
+
+  whoami:
+    image: traefik/whoami
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
+  kuma_data:

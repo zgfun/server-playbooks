@@ -1,0 +1,11 @@
+{
+	email {{ app_email }}
+}
+
+status.{{ app_domain }} {
+	reverse_proxy uptime-kuma:3001
+}
+
+{{ app_domain }} {
+	reverse_proxy whoami:80
+}

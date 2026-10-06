@@ -1,0 +1,25 @@
+---
+# First contact with a box that cloud-init did NOT prepare (any provider).
+# Runs as root with a password or key, creates the deploy user, then site.yml
+# can take over as that user.
+- name: Bootstrap a fresh server
+  hosts: all
+  remote_user: root
+  become: false
+  tasks:
+    - name: Install python for Ansible
+      ansible.builtin.raw: test -e /usr/bin/python3 || (apt-get update && apt-get install -y python3)
+      changed_when: false
+
+    - name: Create the deploy user
+      ansible.builtin.user:
+        name: "{{ deploy_user }}"
+        groups: sudo
+        append: true
+        shell: /bin/bash
+
+    - name: Install SSH keys for the deploy user
+      ansible.posix.authorized_key:
+        user: "{{ deploy_user }}"
+        key: "{{ item }}"
+      loop: "{{ ssh_public_keys }}"

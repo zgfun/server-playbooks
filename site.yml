@@ -1,0 +1,15 @@
+---
+# Full configuration of a freshly created VPS. Idempotent: run it as often as you like.
+- name: Configure web servers
+  hosts: web
+  roles:
+    - role: base
+      tags: [base]
+    - role: hardening
+      tags: [hardening]
+    - role: docker
+      tags: [docker]
+    - role: app
+      tags: [app]
+    - role: backup
+      tags: [backup]
